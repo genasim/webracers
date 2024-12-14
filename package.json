@@ -1,0 +1,16 @@
+{
+  "name": "webracers",
+  "version": "1.0.0",
+  "description": "Webracers is an online car-racing game where players can race together on their own custom-made tracks",
+  "main": "index.js",
+  "scripts": {
+    "start": "docker compose up --watch",
+    "format:service": "npx prettier --write ./service "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.4.2"
+  }
+}

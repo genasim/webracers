@@ -1,0 +1,16 @@
+services:
+  web:
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    command: npm start
+    develop:
+      watch:
+        - action: sync
+          path: ./service/
+          target: /opt/app/webracers-service
+          ignore:
+            - package.json
+            - package-lock.json
+        - action: rebuild
+          path: ./web/package.json

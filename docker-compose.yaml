@@ -5,8 +5,8 @@ services:
     image: webracers-service
     build:
       args:
-        - BASE_PATH_CONTAINER=$BASE_PATH_CONTAINER
-      context: $BASE_PATH_HOST
+        - BASE_PATH_CONTAINER=${BASE_PATH_CONTAINER}
+      context: ${BASE_PATH_HOST}
       dockerfile: Dockerfile
     command: npm start
     ports:
@@ -14,10 +14,10 @@ services:
     develop:
       watch:
         - action: sync
-          path: $BASE_PATH_HOST
+          path: ${BASE_PATH_HOST}
           target: $BASE_PATH_CONTAINER
           ignore:
-            - $BASE_PATH_HOST/package.json
-            - $BASE_PATH_HOST/package-lock.json
+            - ${BASE_PATH_HOST}/package.json
+            - ${BASE_PATH_HOST}/package-lock.json
         - action: rebuild
-          path: $BASE_PATH_HOST/package.json
+          path: ${BASE_PATH_HOST}/package.json

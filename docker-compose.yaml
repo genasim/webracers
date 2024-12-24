@@ -1,23 +1,41 @@
 services:
   master:
-    env_file:
-      - ./.env
     image: webracers-service
     build:
       args:
-        - BASE_PATH_CONTAINER=${BASE_PATH_CONTAINER}
-      context: ${BASE_PATH_HOST}
+        - BASE_PATH_CONTAINER=${MASTER_BASE_PATH_CONTAINER}
+      context: ${MASTER_BASE_PATH_HOST}
       dockerfile: Dockerfile
     command: npm start
     ports:
-      - ${HOST_PORT}:${CONTAINER_PORT}
+      - ${MASTER_HOST_PORT}:${MASTER_CONTAINER_PORT}
+    environment:
+      - PORT=${MASTER_CONTAINER_PORT}
     develop:
       watch:
         - action: sync
-          path: ${BASE_PATH_HOST}
-          target: $BASE_PATH_CONTAINER
+          path: ${MASTER_BASE_PATH_HOST}
+          target: ${MASTER_BASE_PATH_CONTAINER}
           ignore:
-            - ${BASE_PATH_HOST}/package.json
-            - ${BASE_PATH_HOST}/package-lock.json
+            - ${MASTER_BASE_PATH_HOST}/package.json
+            - ${MASTER_BASE_PATH_HOST}/package-lock.json
         - action: rebuild
-          path: ${BASE_PATH_HOST}/package.json
+          path: ${MASTER_BASE_PATH_HOST}/package.json
+
+  client:
+    image: ${CLIENT_IMAGE_TAG}
+    build:
+      context: ${CLIENT_BASE_PATH_HOST}
+      dockerfile: Dockerfile
+    ports:
+      - ${CLIENT_HOST_PORT}:80
+    depends_on:
+      - master
+    develop:
+      watch:
+        - action: sync
+          path: ${CLIENT_BASE_PATH_HOST}/public
+          target: /usr/share/nginx/html
+        - action: sync+restart
+          path: ${CLIENT_BASE_PATH_HOST}/ngingx.conf
+          target: /etc/nginx/nginx.conf

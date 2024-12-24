@@ -2,25 +2,30 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 
+const PORT = process.env.PORT || 3000;
+const CLIENT_PORT = process.env.CLIENT_PORT || 4000;
+
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
-
-const PORT = process.env.PORT || 3000;
+const io = new Server(server, {
+  cors: {
+    origin: `http://localhost:${CLIENT_PORT}`,
+  },
+});
 
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Hello World' });
 });
 
-io.on('connection', (socket) => {
+io.on('connect', (socket) => {
   console.log('user connected');
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 
-  socket.on('message', (message) => {
-    console.log('received message:', message);
-    socket.emit('response', { message });
+  socket.on('chat message', data => {
+    console.log('received message: ', data);
+    io.emit('chat message', data);
   });
 });
 

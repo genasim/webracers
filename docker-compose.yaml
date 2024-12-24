@@ -1,16 +1,23 @@
 services:
-  web:
+  master:
+    env_file:
+      - ./.env
+    image: webracers-service
     build:
-      context: ./service
+      args:
+        - BASE_PATH_CONTAINER=$BASE_PATH_CONTAINER
+      context: $BASE_PATH_HOST
       dockerfile: Dockerfile
     command: npm start
+    ports:
+      - ${HOST_PORT}:${CONTAINER_PORT}
     develop:
       watch:
         - action: sync
-          path: ./service/
-          target: /opt/app/webracers-service
+          path: $BASE_PATH_HOST
+          target: $BASE_PATH_CONTAINER
           ignore:
-            - package.json
-            - package-lock.json
+            - $BASE_PATH_HOST/package.json
+            - $BASE_PATH_HOST/package-lock.json
         - action: rebuild
-          path: ./web/package.json
+          path: $BASE_PATH_HOST/package.json

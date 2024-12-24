@@ -1,6 +1,8 @@
 FROM node:20-alpine
 
-WORKDIR /opt/app/webracers-service
+ARG BASE_PATH_CONTAINER
+
+WORKDIR ${BASE_PATH_CONTAINER}
 
 COPY . .
 

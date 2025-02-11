@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
+import { playerStoreService } from './src/playerStore.js';
 
 const PORT = process.env.PORT || 3000;
 const CLIENT_PORT = process.env.CLIENT_PORT || 4000;
@@ -18,14 +19,14 @@ app.get('/', (req, res) => {
 });
 
 io.on('connect', (socket) => {
-  console.log('user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+  socket.on('register_player', () => {
+    console.log('register_player');
+    playerStoreService.registerPlayer(socket);
   });
 
-  socket.on('chat message', data => {
-    console.log('received message: ', data);
-    io.emit('chat message', data);
+  socket.on('disconnect', () => {
+    console.log(`user disconnected on ${socket.id}`);
+    playerStoreService.unregisterPlayer(socket);
   });
 });
 

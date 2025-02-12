@@ -14,7 +14,7 @@ const io = new Server(server, {
   },
 });
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.status(200).json({ message: 'Hello World' });
 });
 
@@ -27,6 +27,14 @@ io.on('connect', (socket) => {
   socket.on('disconnect', () => {
     console.log(`user disconnected on ${socket.id}`);
     playerStoreService.unregisterPlayer(socket);
+  });
+
+  socket.on('move_player', ({ x, y }) => {
+    const { player } = playerStoreService.getPlayer(socket);
+    player.updatePosition({ x, y });
+    io.emit('game_update', {
+      players: playerStoreService.getPlayers(),
+    });
   });
 });
 

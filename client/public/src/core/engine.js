@@ -20,9 +20,7 @@ export class Engine {
       const { players } = data;
 
       players.forEach((player) => {
-        const existingPlayer = this.players.find((p) => p.id === player.id);
-        console.log('existingPlayer', existingPlayer);
-        
+        const existingPlayer = this.players.find((p) => p.id === player.id);        
 
         if (existingPlayer) {
           existingPlayer.updatePosition(player.player.position);

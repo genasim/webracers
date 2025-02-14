@@ -2,6 +2,7 @@ export class Player {
   constructor({ position }) {
     this.position = position;
     this.keysPressed = {};
+    this.socket = null;
   }
 
   render(ctx) {
@@ -9,40 +10,30 @@ export class Player {
   }
 
   init(socket) {
+    this.socket = socket;
+
     window.addEventListener('keydown', (event) => {
       this.keysPressed[event.key] = true;
+      this.sendMovementUpdate();
     });
 
     window.addEventListener('keyup', (event) => {
       delete this.keysPressed[event.key];
+      this.sendMovementUpdate();
     });
 
-    this.movementInterval = setInterval(() => {
-      let newX = this.position.x;
-      let newY = this.position.y;
-      let moved = false;
+    setInterval(() => this.sendMovementUpdate(), 100); // Periodic update in case of missed events
+  }
 
-      if (this.keysPressed['w']) {
-        newY -= 5;
-        moved = true;
-      }
-      if (this.keysPressed['a']) {
-        newX -= 5;
-        moved = true;
-      }
-      if (this.keysPressed['s']) {
-        newY += 5;
-        moved = true;
-      }
-      if (this.keysPressed['d']) {
-        newX += 5;
-        moved = true;
-      }
-
-      if (moved) {
-        socket.emit('move_player', { x: newX, y: newY });
-      }
-    }, 50); // Adjust interval for movement smoothness
+  sendMovementUpdate() {
+    if (this.socket) {
+      this.socket.emit('move_player', {
+        w: this.keysPressed['w'] || false,
+        a: this.keysPressed['a'] || false,
+        s: this.keysPressed['s'] || false,
+        d: this.keysPressed['d'] || false,
+      });
+    }
   }
 
   updatePosition({ x, y }) {

@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import { playerStoreService } from './src/playerStore.js';
+import { GameEngine } from './src/gameEngine.js';
 
 const PORT = process.env.PORT || 3000;
 const CLIENT_PORT = process.env.CLIENT_PORT || 4000;
@@ -14,11 +15,13 @@ const io = new Server(server, {
   },
 });
 
+const gameEngine = new GameEngine(io);
+
 app.get('/', (_, res) => {
   res.status(200).json({ message: 'Hello World' });
 });
 
-io.on('connect', (socket) => {
+io.on('connection', (socket) => {
   socket.on('register_player', () => {
     console.log('register_player');
     playerStoreService.registerPlayer(socket);
@@ -29,16 +32,13 @@ io.on('connect', (socket) => {
     playerStoreService.unregisterPlayer(socket);
   });
 
-  socket.on('move_player', ({ x, y }) => {
-    const { player } = playerStoreService.getPlayer(socket);
-    player.updatePosition({ x, y });
-    io.emit('game_update', {
-      players: playerStoreService.getPlayers(),
-    });
+  socket.on('move_player', (movementState) => {
+    playerStoreService.updatePlayerMovement(socket, movementState);
   });
 });
 
 server.listen(PORT, () => {
   console.log('====================================');
   console.log(`Service is listening on container port ${PORT}`);
+  gameEngine.start();
 });

@@ -5,7 +5,7 @@ const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
 
 export class Engine {
-  players = [];
+  players = new Map();
   socket;
 
   clientPlayerId = undefined;
@@ -19,15 +19,19 @@ export class Engine {
     this.socket.on('game_update', (data) => {
       const { players } = data;
 
-      players.forEach((player) => {
-        const existingPlayer = this.players.find((p) => p.id === player.id);        
-
-        if (existingPlayer) {
-          existingPlayer.updatePosition(player.player.position);
+      const updatedPlayers = new Map();
+      
+      players.forEach((playerData) => {
+        let player = this.players.get(playerData.id);
+        if (!player) {
+          player = new Player({ position: playerData.position });
         } else {
-          this.players.push(new Player(player));
+          player.updatePosition(playerData.position);
         }
+        updatedPladsyers.set(playerData.id, player);
       });
+
+      this.players = updatedPlayers;
       this.draw();
     });
   }
@@ -40,7 +44,7 @@ export class Engine {
       this.clientPlayer = new Player({ position: player.position });
       this.clientPlayer.init(socket);
 
-      this.players.push(this.clientPlayer);
+      this.players.set(this.clientPlayerId, this.clientPlayer);
     });
   }
 
